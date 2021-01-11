@@ -10,11 +10,10 @@ cols = 10
 rows = 10
 mines = 10
 
+
 class MineSweeper:
 
     def __init__(self, tk, cols, rows, mines):
-
-        self.grab_focus()
 
         # def dif
         self.isMine = False
@@ -34,7 +33,7 @@ class MineSweeper:
         for i in range(1, 9):
             self.textures['numbers'].append(PhotoImage(file='images/tile_'+str(i)+'.gif'))
         # set up frame
-        self.tk = tk
+        self.tk = Toplevel(tk)
         self.frame = Frame(self.tk)
         self.frame.pack()
         self.labels = {
@@ -236,25 +235,26 @@ class MineSweeper:
         self.top.wait_window()
 
 
-
     def main(self):
         # create Tk instance
         root = Tk()
+        self.root = root
+        self.grab_focus(root)
+
         # set program title
 
-        root.title("Minesweeper")
-        menubar = Menu(root)
-        root.config(menu=menubar)
+        self.root.title("Minesweeper")
+        menubar = Menu(self.root)
+        self.menubar = menubar
+        self.root.config(menu=menubar)
         menubar.add_command(label='Difficult', command=preWindow)
         menubar.add_command(label='Help', command=helpButton)
         menubar.add_separator()
-        menubar.add_command(label='Exit', command=root.quit)
-        minesweeper = MineSweeper(root, cols, rows, mines)
+        menubar.add_command(label='Exit', command=self.root.quit)
+
         # call a func inside class# run event loop
         # run event loop
-        self.root.mainloop()
-
-
+        root.mainloop()
 
     # mineswepeer ends
 
@@ -264,8 +264,7 @@ def easyChoice():
     cols = 10
     rows = 10
     mines = 10
-    ask.quit()
-    print(cols, rows, mines)
+    mm = MineSweeper(ask,cols,rows,mines)
 
 
 
@@ -275,8 +274,7 @@ def mediumChoice():
     cols = 18
     rows = 18
     mines = 36
-    ask.quit()
-    print(cols,rows,mines)
+    mm = MineSweeper(ask, cols, rows, mines)
 
 
 def hardChoice():
@@ -284,8 +282,7 @@ def hardChoice():
     cols = 24
     rows = 24
     mines = 48
-    ask.quit()
-    print(cols, rows, mines)
+    mm = MineSweeper(ask, cols, rows, mines)
 
 
 
@@ -294,16 +291,18 @@ def preWindow():
     ask = Tk()
     ask.title('Minesweeper v. 1.0.0')
     ask.geometry('300x300')
+    ask.minsize(300,300)
+    ask.maxsize(300,300)
     ask.configure(bg='black')
 
     info = Label(ask, text='Пожалуйста, выберите сложность', bg='gray', anchor=N, font=14)
-    info.pack(fill=X)
+    info.grid(column=0, row=0,columnspan=3)
     easy = Button(ask, text='Легко', command=easyChoice, anchor=CENTER, bg='red', font=14)
-    easy.pack(side=LEFT)
+    easy.grid(column=0,row=3)
     medium = Button(ask, text='Средне', command=mediumChoice, anchor=CENTER, bg='red', font=14)
-    medium.pack(side=LEFT, expand=2.5)
+    medium.grid(column=1,row=3)
     hard = Button(ask, text='Сложно', command=hardChoice, anchor=CENTER, bg='red', font=14)
-    hard.pack(side=RIGHT)
+    hard.grid(column=2,row=3)
 
     ask.mainloop()
 
@@ -314,5 +313,6 @@ def helpButton():
 
 if __name__ == "__main__":
     preWindow()
+
 
 
