@@ -6,6 +6,7 @@ from datetime import *
 import cfg
 import os
 
+
 cols = 10
 rows = 10
 mines = 10
@@ -15,13 +16,14 @@ class MineSweeper:
 
     def __init__(self, tk, cols, rows, mines):
 
-        # def dif
+        # определение размеров поля и нахождение на клетке мины и инициализация окна
         self.isMine = False
         self.cols = cols
         self.rows = rows
         self.mines = mines
+        self.ask = ask
 
-        # import images
+        # import изображений
         self.textures = {
             'empty': PhotoImage(file='images/plain.gif'),
             "clicked": PhotoImage(file="images/clicked.gif"),
@@ -32,31 +34,45 @@ class MineSweeper:
         }
         for i in range(1, 9):
             self.textures['numbers'].append(PhotoImage(file='images/tile_'+str(i)+'.gif'))
-        # set up frame
+
+        # настройка окна игры
         self.tk = Toplevel(tk)
+        self.tk.resizable(False, False)
         self.frame = Frame(self.tk)
-        self.frame.pack()
+        self.frame.grid(row=1, column=0)
+        self.x = (self.tk.winfo_screenwidth() - self.tk.winfo_reqwidth()) / 2
+        self.y = (self.tk.winfo_screenheight() - self.tk.winfo_reqheight()) / 2
+        self.tk.wm_geometry("+%d+%d" % (self.x, self.y))
         self.labels = {
             "time": Label(self.frame, text="00:00:00"),
             "mines": Label(self.frame, text="Mines: 0"),
             "flags": Label(self.frame, text="Flags: 0")
         }
 
-        self.labels["time"].grid(row=0, column=0, columnspan=self.cols)  # top full width
-        self.labels["mines"].grid(row=self.rows + 1, column=0, columnspan=int(self.cols / 2))  # bottom left
-        self.labels["flags"].grid(row=self.rows + 1, column=int(self.cols / 2) - 1, columnspan=int(self.cols / 2))  # bottom right
+        self.labels["time"].grid(row=0, column=0, columnspan=self.cols)
+        self.labels["mines"].grid(row=self.rows + 1, column=0, columnspan=int(self.cols / 2))
+        self.labels["flags"].grid(row=self.rows + 1, column=int(self.cols/2) - 1, columnspan=int(self.cols/2))
+        # инициализация меню
+        self.menubar = Menu(self.tk)
+        self.tk.config(menu=self.menubar)
+        self.menubar.add_command(label='Сложность', command=lambda: self.tk.destroy())
+        self.menubar.add_command(label='Справка', command=helpButton)
+        self.menubar.add_separator()
+        self.menubar.add_command(label='Выход', command=self.quitAll)
+        self.tk.iconbitmap('images/window_icon.ico')
 
-        self.restart()  # start the game
-        self.updateTimer()  # init timer
+        self.restart()  # начать игру
+        self.updateTimer()  # инициализация таймера
+        self.grab_focus()  # grabbing focus к дочернему окну self.tk
 
     def setup(self):
-        # creating variables(flag,counters etc.)
+        # создаем необходимые переменные для игры
         self.flagCount = 0
         self.CorrectFlagCount = 0
         self.clickedCount = 0
         self.startTime = None
 
-        # create field(dict of buttons)
+        # создание поля(словарь кнопок)
         self.tiles=dict({})
         self.mines = 0
         for x in range(0, self.rows):
@@ -87,7 +103,7 @@ class MineSweeper:
                 tile["button"].grid(row=x + 1, column=y)  # offset by 1 row for timer
                 self.tiles[x][y] = tile
 
-                # New loop to find mines nearby and display numbers on tile
+                # Новый цикл найти мины поблизости и отобразить их на кнопках
         for x in range(0, self.cols):
             for y in range(0, self.rows):
                 mc = 0
@@ -118,7 +134,11 @@ class MineSweeper:
         if res:
             self.restart()
         else:
-            self.tk.quit()
+            self.tk.destroy()
+
+    def quitAll(self):
+        self.tk.destroy()
+        self.ask.destroy()
 
     def updateTimer(self):
         ts = '00:00:00'
@@ -227,36 +247,10 @@ class MineSweeper:
         tile["state"] = cfg.STATE_CLICKED
         self.clickedCount += 1
 
-    def grab_focus(self, window):
-        self.window = window
-        self.top = Toplevel(self.window)
-        self.top.grab_set()
-        self.top.focus_set()
-        self.top.wait_window()
-
-
-    def main(self):
-        # create Tk instance
-        root = Tk()
-        self.root = root
-        self.grab_focus(root)
-
-        # set program title
-
-        self.root.title("Minesweeper")
-        menubar = Menu(self.root)
-        self.menubar = menubar
-        self.root.config(menu=menubar)
-        menubar.add_command(label='Difficult', command=preWindow)
-        menubar.add_command(label='Help', command=helpButton)
-        menubar.add_separator()
-        menubar.add_command(label='Exit', command=self.root.quit)
-
-        # call a func inside class# run event loop
-        # run event loop
-        root.mainloop()
-
-    # mineswepeer ends
+    def grab_focus(self):
+        self.tk.grab_set()
+        self.tk.focus_set()
+        self.tk.wait_window()
 
 
 def easyChoice():
@@ -264,9 +258,7 @@ def easyChoice():
     cols = 10
     rows = 10
     mines = 10
-    mm = MineSweeper(ask,cols,rows,mines)
-
-
+    mm = MineSweeper(ask, cols, rows, mines)
 
 
 def mediumChoice():
@@ -285,26 +277,37 @@ def hardChoice():
     mm = MineSweeper(ask, cols, rows, mines)
 
 
-
 def preWindow():
     global ask
     ask = Tk()
     ask.title('Minesweeper v. 1.0.0')
-    ask.geometry('300x300')
-    ask.minsize(300,300)
-    ask.maxsize(300,300)
+    ask.iconbitmap('images/window_icon.ico')
+    ask.resizable(False, False)
+    x = (ask.winfo_screenwidth() - ask.winfo_reqwidth()) / 2
+    y = (ask.winfo_screenheight() - ask.winfo_reqheight()) / 2
+    ask.wm_geometry("+%d+%d" % (x, y))
     ask.configure(bg='black')
 
-    info = Label(ask, text='Пожалуйста, выберите сложность', bg='gray', anchor=N, font=14)
-    info.grid(column=0, row=0,columnspan=3)
-    easy = Button(ask, text='Легко', command=easyChoice, anchor=CENTER, bg='red', font=14)
-    easy.grid(column=0,row=3)
-    medium = Button(ask, text='Средне', command=mediumChoice, anchor=CENTER, bg='red', font=14)
-    medium.grid(column=1,row=3)
-    hard = Button(ask, text='Сложно', command=hardChoice, anchor=CENTER, bg='red', font=14)
-    hard.grid(column=2,row=3)
+    canv = Canvas(ask, width=300, height=300, bg='#9a9a9a')
+    canv.grid(row=0, column=0, rowspan=10, columnspan=7)
+    canv.create_line(0, 24, 300, 24, width=5, fill='#686868')
+    canv.create_rectangle(5, 5, 300, 300, width=5, outline='#686868')
+    canv.create_line(0, 202, 300, 202, width=5, fill='#686868')
+    info = Label(ask, text='Пожалуйста, выберите сложность', font='Arial 11', bg='#686868', fg='#ffffff',
+                 width=27, justify=CENTER)
+    info.grid(column=0, row=0, columnspan=7)
+    easy = Button(ask, text='Легко', command=easyChoice, anchor=CENTER, font='Arial 15', width=7, background='#686868',
+                  highlightbackground='#686868', fg='#ffffff', activebackground='#464646', activeforeground="#ffffff")
+    easy.grid(column=0, row=6, columnspan=3)
+    medium = Button(ask, text='Средне', command=mediumChoice, anchor=CENTER, font='Arial 15', width=7, background='#686868',
+                    highlightbackground='#686868', fg='#ffffff', activebackground='#464646', activeforeground="#ffffff")
+    medium.grid(column=2, row=6, columnspan=3)
+    hard = Button(ask, text='Сложно', command=hardChoice, anchor=CENTER, font='Arial 15', width=7, background='#686868',
+                  highlightbackground='#686868', fg='#ffffff', activebackground='#464646', activeforeground="#ffffff")
+    hard.grid(column=4, row=6, columnspan=3)
 
     ask.mainloop()
+
 
 def helpButton():
     path = os.path.normpath('help.txt')
@@ -313,6 +316,3 @@ def helpButton():
 
 if __name__ == "__main__":
     preWindow()
-
-
-

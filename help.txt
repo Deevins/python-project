@@ -1,18 +1,17 @@
 Python Tkinter Minesweeper
 ===========================
 
-Minesweeper game written in Python using Tkinter GUI library.
+Игра "Сапёр" написана на языке программирования 'Python' с использованием модуля GUI TKinter.
 
 
-Contents:
+Компоненты:
 ----------
 
-- */main.py* - The actual python program
-- */images/* - GIF Images ready for usage with Tkinter
-- */images/original* - Original PNG images made with GraphicsGale
+- */main.py* - основной исполняемый файл
+- */images/* - GIF изображения готовые к использованию
+- */images/original* - Оригиналы GIF изображений
 
-To Do:
+Планы на будущее:
 ----------
-- Have specific number of mines, rather than random
-- Highscore table
-- Adjustable grid and mine count via UI
+- Добавить таблицу рекордов с использованием баз данных
+- Дать пользователю возможность самому выбирать размеры поля и количество мин
